@@ -19,7 +19,7 @@ class IndexTask {
     CANNOT_INDEX
   };
 
-  static const int INDEX_TIMEOUT_MS = 5000u;  // [ms]
+  static const int INDEX_TIMEOUT_MS = 10000u;  // [ms]
 
   IndexTask(StepperController* stepper_controller, HallSwitch* hall_switch);
   void init();

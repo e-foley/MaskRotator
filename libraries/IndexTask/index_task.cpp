@@ -90,6 +90,7 @@ void IndexTask::step() {
       // Last step in reverse...
       if (!hall_switch_->isTriggered()) {
         key_positions_deg_[3] = stepper_controller_->getPosition();
+        stepper_controller_->stop();
         float angle_sum_deg_ = 0.0f;
         for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {
           angle_sum_deg_ += key_positions_deg_[i];
@@ -109,6 +110,7 @@ void IndexTask::step() {
       if (index_requested_) {
         index_requested_ = false;
         stepper_controller_->forward();
+        hall_switch_->setPowerState(true);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::WAITING_FOR_FORWARD_LOW;
       }
@@ -118,6 +120,7 @@ void IndexTask::step() {
       if (index_requested_) {
         index_requested_ = false;
         stepper_controller_->forward();
+        hall_switch_->setPowerState(true);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::WAITING_FOR_FORWARD_LOW;
       }
