@@ -1,8 +1,6 @@
 #ifndef BIPOLAR_STEPPER_H_
 #define BIPOLAR_STEPPER_H_
 
-#include <Arduino.h>
-
 //! Represents a bipolar stepper motor.
 class BipolarStepper {
  public:

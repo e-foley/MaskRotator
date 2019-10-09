@@ -1,13 +1,13 @@
-#include "Arduino.h"
-#include "Math.h"
 #include "bipolar_stepper.h"
+#include <Arduino.h>
 
-BipolarStepper::BipolarStepper(int brka, int dira, int pwma, int brkb, int dirb, int pwmb)
-    : brka_(brka), dira_(dira), pwma_(pwma), brkb_(brkb), dirb_(dirb), pwmb_(pwmb), state_(0),
-    initialized_(false), enabled_(false) {}
+BipolarStepper::BipolarStepper(int brka, int dira, int pwma, int brkb, int dirb,
+    int pwmb) : brka_(brka), dira_(dira), pwma_(pwma), brkb_(brkb), dirb_(dirb),
+    pwmb_(pwmb), state_(0), initialized_(false), enabled_(false) {}
 
 BipolarStepper::~BipolarStepper() {
-  // Put our outputs in what should be a safe state before destroying the object that controls them.
+  // Put our outputs in what should be a safe state before destroying the object
+  // that controls them.
   digitalWrite(brka_, LOW);
   digitalWrite(dira_, LOW);
   digitalWrite(pwma_, LOW);
