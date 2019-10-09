@@ -41,8 +41,12 @@ float StepperController::getTarget() const volatile {
   return target_angle_;
 }
 
-void StepperController::setZero(const float relative_angle) volatile {
-  position_ = degreesToSteps(-relative_angle);
+void StepperController::setZero() volatile {
+  position_ = 0;
+}
+
+void StepperController::offsetZero(const float relative_angle_deg) volatile {
+  position_ -= degreesToSteps(relative_angle_deg);
 }
 
 // Note: Instead of a switch tree, we could just set a function pointer (to a private helper
