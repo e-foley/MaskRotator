@@ -10,6 +10,12 @@
 // field. No other functions should attempt to manipulate the HallSwitch,
 // MaskController, or the MaskController's dependencies while indexing is
 // active.
+//
+// The method used to determine an index is to advance the mask forward,
+// recording angular positions at which the Hall effect switch triggers from
+// low to high and from high to low; then doing the same in reverse; then taking
+// the eaverage of all four positions. Finally, the mask homes to its new zero
+// point to show the operator where the device believes this point to be.
 class IndexTask {
  public:
 
