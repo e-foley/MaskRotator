@@ -30,14 +30,6 @@ class IndexTask {
  private:
   static const size_t NUM_KEY_POSITIONS = 4u;
 
-  void runInit();
-  void runWaitingForForwardLow();
-  void runForwardLow();
-  void runForwardHigh();
-  void runReverseLow();
-  void runReverseHigh();
-  void runIndexed();
-  void runCannotIndex();
   bool timedOut() const;
 
   MaskController* const mask_controller_;
