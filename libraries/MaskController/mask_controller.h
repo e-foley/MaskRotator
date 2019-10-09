@@ -21,7 +21,8 @@ class MaskController {
     float rotateBy(float relative_angle, bool wrap_result = true);
     float getPosition(bool wrap_result = true) const;
     float getTarget(bool wrap_result = true) const;
-    void setZero(float relative_angle = 0.0f);
+    void setZero();
+    void offsetZero(float relative_angle_deg);
     float maskToMotorAngle(float mask_angle) const;
     float motorToMaskAngle(float motor_angle) const;
 

@@ -82,12 +82,20 @@ float MaskController::getTarget(const bool wrap_result) const {
   return wrap_result ? wrapAngle(target_) : target_;
 }
 
-void MaskController::setZero(const float relative_angle) {
+void MaskController::setZero() {
   if (stepper_controller_ == nullptr) {
     return;
   }
   stepper_controller_->stop();
-  stepper_controller_->setZero(maskToMotorAngle(relative_angle));
+  stepper_controller_->setZero();
+}
+
+void MaskController::offsetZero(const float relative_angle_deg) {
+  if (stepper_controller_ == nullptr) {
+    return;
+  }
+  stepper_controller_->stop();
+  stepper_controller_->offsetZero(maskToMotorAngle(relative_angle_deg));
 }
 
 float MaskController::wrapAngle(const float nominal) {

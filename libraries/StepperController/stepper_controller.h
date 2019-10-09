@@ -23,7 +23,8 @@ class StepperController {
     float rotateBy(float relative_angle) volatile;
     float getPosition() const volatile;
     float getTarget() const volatile;
-    void setZero(float angle_relative_to_current = 0.0f) volatile;
+    void setZero() volatile;
+    void offsetZero(float relative_angle_deg) volatile;
     void update() volatile;
     int32_t degreesToSteps(float degrees) const volatile;
     float stepsToDegrees(int32_t steps) const volatile;
