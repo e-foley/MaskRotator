@@ -1,8 +1,8 @@
 #include "hall_switch.h"
 #include <Arduino.h>
 
-HallSwitch::HallSwitch(const int power_pin, const int state_pin) : power_pin_(power_pin),
-    state_pin_(state_pin), is_initialized_(false) {}
+HallSwitch::HallSwitch(const int power_pin, const int state_pin) :
+    power_pin_(power_pin), state_pin_(state_pin), is_initialized_(false) {}
 
 void HallSwitch::init() {
   pinMode(power_pin_, OUTPUT);
