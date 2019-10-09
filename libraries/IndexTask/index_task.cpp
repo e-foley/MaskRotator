@@ -96,6 +96,7 @@ void IndexTask::step() {
           angle_sum_deg_ += key_positions_deg_[i];
         }
         mask_controller_->offsetZero(angle_sum_deg_ / NUM_KEY_POSITIONS);
+        mask_controller_->rotateTo(0.0f);
         hall_switch_->setPowerState(false);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::INDEXED;
