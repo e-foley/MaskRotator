@@ -2,7 +2,7 @@
 #define INDEX_TASK_H_
 
 #include "hall_switch.h"
-#include "stepper_controller.h"
+#include "mask_controller.h"
 #include <Arduino.h>
 
 class IndexTask {
@@ -21,7 +21,7 @@ class IndexTask {
 
   static const int INDEX_TIMEOUT_MS = 10000u;  // [ms]
 
-  IndexTask(StepperController* stepper_controller, HallSwitch* hall_switch);
+  IndexTask(MaskController* mask_controller, HallSwitch* hall_switch);
   void init();
   void step();
   void index();
@@ -40,7 +40,7 @@ class IndexTask {
   void runCannotIndex();
   bool timedOut() const;
 
-  StepperController* const stepper_controller_;
+  MaskController* const mask_controller_;
   HallSwitch* const hall_switch_;
   bool init_requested_;
   bool index_requested_;

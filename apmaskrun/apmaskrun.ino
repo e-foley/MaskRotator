@@ -24,8 +24,8 @@ const int HALL_SWITCH_STATE_PIN = 5;
 BipolarStepper stepper(BRKA_PIN, DIRA_PIN, PWMA_PIN, BRKB_PIN, DIRB_PIN, PWMB_PIN);
 HallSwitch hall_switch(HALL_SWITCH_POWER_PIN, HALL_SWITCH_STATE_PIN);
 StepperController motor_controller(&stepper, MOTOR_STEPS);
-IndexTask index_task(&motor_controller, &hall_switch);
 MaskController mask_controller(&motor_controller, GEAR_RATIO);
+IndexTask index_task(&mask_controller, &hall_switch);
 TimerOne timer;
 
 enum class Mode {
