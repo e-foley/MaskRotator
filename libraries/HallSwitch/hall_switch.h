@@ -10,8 +10,8 @@ class HallSwitch {
   bool isTriggered() const;
 
  private:
-   int power_pin_;
-   int state_pin_;
+   const int power_pin_;
+   const int state_pin_;
    bool is_initialized_;
 };
 
