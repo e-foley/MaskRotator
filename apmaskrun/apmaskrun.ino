@@ -1,9 +1,13 @@
 #include "Arduino.h"
 #include "bipolar_stepper.h"
+#include "hall_switch.h"
 #include "mask_controller.h"
+#include "index_task.h"
 #include "stepper_controller.h"
 #include "timer_one.h"
 
+const int SERIAL_BAUD_RATE = 19200;
+const int SERIAL_TIMEOUT_MS = 10;  // [ms]
 const float GEAR_RATIO = 72.0/17.0;
 const int16_t MOTOR_STEPS = 200u;
 const int BRKA_PIN = 9;
@@ -14,9 +18,13 @@ const int DIRB_PIN = 13;
 const int PWMB_PIN = 11;
 uint32_t STEP_PERIOD_US = 8000u;  // [us]
 const MaskController::Direction PREFERRED_DIRECTION = MaskController::Direction::AUTO;
+const int HALL_SWITCH_POWER_PIN = 4;
+const int HALL_SWITCH_STATE_PIN = 5;
 
 BipolarStepper stepper(BRKA_PIN, DIRA_PIN, PWMA_PIN, BRKB_PIN, DIRB_PIN, PWMB_PIN);
-volatile StepperController motor_controller(&stepper, MOTOR_STEPS);
+HallSwitch hall_switch(HALL_SWITCH_POWER_PIN, HALL_SWITCH_STATE_PIN);
+StepperController motor_controller(&stepper, MOTOR_STEPS);
+IndexTask index_task(&motor_controller, &hall_switch);
 MaskController mask_controller(&motor_controller, GEAR_RATIO);
 TimerOne timer;
 
@@ -30,15 +38,19 @@ float target = 0.0f;
 bool dir = true;
 
 void setup() {
-  Serial.begin(19200);
-  Serial.setTimeout(10);
+  Serial.begin(SERIAL_BAUD_RATE);
+  Serial.setTimeout(SERIAL_TIMEOUT_MS);
   stepper.initialize();
   stepper.enable();
+  hall_switch.init();
+  index_task.init();
   timer.initialize();
   timer.attachInterrupt(update, STEP_PERIOD_US);
 }
 
 void loop() {
+  index_task.step();
+
   if (Serial.available()) {
     const char command = Serial.peek();
     switch (command) {
@@ -93,6 +105,10 @@ void loop() {
         Serial.read();
         mode = Mode::ABSOLUTE;
         Serial.println("Mode set to absolute.");
+        break;
+      case 'i':
+        Serial.read();
+        index_task.index();
         break;
       default: {
         float actual = 0.0f;
