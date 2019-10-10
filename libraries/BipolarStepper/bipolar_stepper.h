@@ -1,7 +1,7 @@
 #ifndef BIPOLAR_STEPPER_H_
 #define BIPOLAR_STEPPER_H_
 
-//! Represents a bipolar stepper motor.
+// Represents a bipolar stepper motor.
 class BipolarStepper {
  public:
   // Constructs a BipolarStepper by denoting Arduino pins to be used for motor
