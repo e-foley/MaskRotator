@@ -1,8 +1,11 @@
 #include "mask_controller.h"
+#include "stepper_controller.h"
+#include <Math.h>
 
-MaskController::MaskController(volatile StepperController* const stepper_controller,
-    const float gear_ratio) : stepper_controller_(stepper_controller), gear_ratio_(gear_ratio),
-    target_(0.0f) {}
+MaskController::MaskController(
+    volatile StepperController* const stepper_controller,
+    const float gear_ratio) : stepper_controller_(stepper_controller),
+    gear_ratio_(gear_ratio), target_deg_(0.0f) {}
 
 void MaskController::forward() {
   if (stepper_controller_ == nullptr) {
@@ -32,54 +35,57 @@ void MaskController::stop() {
   }
 }
 
-float MaskController::rotateTo(const float angle, const Direction direction,
-    const bool wrap_result) {
+float MaskController::rotateTo(const float target_deg,
+    const Direction direction, const bool wrap_result) {
   if (stepper_controller_ == nullptr) {
     return NAN;
   }
 
-  // Stop and record because the motor angle would theoretically change as we progress through the
-  // function if we didn't do this.
+  // Stop and record because the motor angle would theoretically change as we
+  // progress through the function if we didn't do this.
   stepper_controller_->stop();
-  // const float motor_angle = stepper_controller_->getPosition();
-  const float current = getPosition(false);
-  const float forward_delta = wrapAngle(angle - current);
-  const float reverse_delta = wrapAngle(current - angle);
+  const float current_deg = getPositionDeg(false);
+  const float forward_delta_deg = wrapAngleDeg(target_deg - current_deg);
+  const float reverse_delta_deg = wrapAngleDeg(current_deg - target_deg);
 
-  float delta_to_use = 0.0f;
+  float delta_to_use_deg = 0.0f;
   switch (direction) {
     default:
     case Direction::NONE:
       break;
     case Direction::FORWARD:
-      delta_to_use = forward_delta;
+      delta_to_use_deg = forward_delta_deg;
       break;
     case Direction::REVERSE:
-      delta_to_use = -reverse_delta;
+      delta_to_use_deg = -reverse_delta_deg;
       break;
     case Direction::AUTO:
-      delta_to_use = forward_delta < reverse_delta ? forward_delta : -reverse_delta;
+      delta_to_use_deg = forward_delta_deg < reverse_delta_deg ?
+          forward_delta_deg : -reverse_delta_deg;
       break;
   }
 
-  return rotateBy(delta_to_use, wrap_result);
+  return rotateBy(delta_to_use_deg, wrap_result);
 }
 
-float MaskController::rotateBy(const float relative_angle, const bool wrap_result) {
-  target_ = getPosition(false) + relative_angle;
-  // We use rotateTo() below rather than rotateBy() so that we don't accumulate roundoff error
-  // between target_ and the converted motor angle target in repeated calls to this function.
-  const float nominal = motorToMaskAngle(stepper_controller_->rotateTo(maskToMotorAngle(target_)));
-  return wrap_result ? wrapAngle(nominal) : nominal;
+float MaskController::rotateBy(const float angle_deg, const bool wrap_result) {
+  target_deg_ = getPositionDeg(false) + angle_deg;
+  // We use rotateTo() below rather than rotateBy() so that we don't accumulate
+  // roundoff error  between target_deg_ and the converted motor angle target in
+  // repeated calls to this function.
+  const float nominal_deg = motorToMaskAngleDeg(
+      stepper_controller_->rotateTo(maskToMotorAngleDeg(target_deg_)));
+  return wrap_result ? wrapAngleDeg(nominal_deg) : nominal_deg;
 }
 
-float MaskController::getPosition(const bool wrap_result) const {
-  const float nominal = motorToMaskAngle(stepper_controller_->getPosition());
-  return wrap_result ? wrapAngle(nominal) : nominal;
+float MaskController::getPositionDeg(const bool wrap_result) const {
+  const float nominal_deg =
+      motorToMaskAngleDeg(stepper_controller_->getPositionDeg());
+  return wrap_result ? wrapAngleDeg(nominal_deg) : nominal_deg;
 }
 
-float MaskController::getTarget(const bool wrap_result) const {
-  return wrap_result ? wrapAngle(target_) : target_;
+float MaskController::getTargetDeg(const bool wrap_result) const {
+  return wrap_result ? wrapAngleDeg(target_deg_) : target_deg_;
 }
 
 void MaskController::setZero() {
@@ -95,17 +101,17 @@ void MaskController::offsetZero(const float relative_angle_deg) {
     return;
   }
   stepper_controller_->stop();
-  stepper_controller_->offsetZero(maskToMotorAngle(relative_angle_deg));
+  stepper_controller_->offsetZero(maskToMotorAngleDeg(relative_angle_deg));
 }
 
-float MaskController::wrapAngle(const float nominal) {
+float MaskController::wrapAngleDeg(const float nominal) {
   return nominal - 360.0f * floor(nominal / 360.0f);
 }
 
-float MaskController::maskToMotorAngle(const float mask_angle) const {
-  return mask_angle * gear_ratio_;
+float MaskController::maskToMotorAngleDeg(const float mask_angle_deg) const {
+  return mask_angle_deg * gear_ratio_;
 }
 
-float MaskController::motorToMaskAngle(const float motor_angle) const {
-  return motor_angle / gear_ratio_;
+float MaskController::motorToMaskAngleDeg(const float motor_angle_deg) const {
+  return motor_angle_deg / gear_ratio_;
 }
