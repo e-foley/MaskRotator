@@ -28,7 +28,7 @@ class IndexTask {
     REVERSE_LOW,              // Backward, waiting for low-to-high transition.
     REVERSE_HIGH,             // Backward, waiting for high-to-low transition.
     INDEXED,                  // Index acquired; waiting for next action.
-    CANNOT_INDEX              // Index couldn't be determined.
+    CANNOT_INDEX              // Index can't be found; waiting for next action.
   };
 
   // Amount of time we are willing to wait for a HallSwitch state transition
