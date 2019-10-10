@@ -3,10 +3,10 @@
 #include "mask_controller.h"
 #include <Arduino.h>
 
-
-IndexTask::IndexTask(MaskController* const mask_controller, HallSwitch* const hall_switch) :
-    mask_controller_(mask_controller), hall_switch_(hall_switch), init_requested_(false),
-    index_requested_(false), state_(State::START), last_index_progress_stamp_ms_(0u) {
+IndexTask::IndexTask(MaskController* const mask_controller,
+    HallSwitch* const hall_switch) : mask_controller_(mask_controller),
+    hall_switch_(hall_switch), init_requested_(false), index_requested_(false),
+    state_(State::START), last_index_progress_stamp_ms_(0u) {
   for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {
     key_positions_deg_[i] = 0.0f;
   }
@@ -28,7 +28,8 @@ void IndexTask::step() {
       }
       break;
     case State::INIT:
-      // State reserved for more functionality... In the meantime, just wait for an index command.
+      // State reserved for more functionality... In the meantime, just wait for
+      // an index command.
       if (index_requested_) {
         index_requested_ = false;
         mask_controller_->forward();
@@ -38,8 +39,8 @@ void IndexTask::step() {
       }
       break;
     case State::WAITING_FOR_FORWARD_LOW:
-      // Wait for a low signal. (This is important if an index is requested when we are currently
-      // near the index position.)
+      // Wait for a low signal. (This is important if an index is requested when
+      // we are currently near the index position.)
       if (!hall_switch_->isTriggered()) {
         last_index_progress_stamp_ms_ = millis();
         state_ = State::FORWARD_LOW;
@@ -62,7 +63,8 @@ void IndexTask::step() {
       }
       break;
     case State::FORWARD_HIGH:
-      // We currently have a triggered sensor... Continue until it's not triggered anymore.
+      // We currently have a triggered sensor... Continue until it's not
+      // triggered anymore.
       if (!hall_switch_->isTriggered()) {
         key_positions_deg_[1] = mask_controller_->getPosition(false);
         mask_controller_->reverse();
@@ -107,7 +109,8 @@ void IndexTask::step() {
       }
       break;
     case State::INDEXED:
-      // We did it! Now wait for the next command to index so we can restart the process.
+      // We did it! Now wait for the next command to index so we can restart the
+      // process.
       if (index_requested_) {
         index_requested_ = false;
         mask_controller_->forward();
@@ -117,7 +120,7 @@ void IndexTask::step() {
       }
       break;
     case State::CANNOT_INDEX:
-      // Not a lot we can do in an error state except wait for our next opportunity.
+      // Not a lot we can do in an error state except wait for instructions.
       if (index_requested_) {
         index_requested_ = false;
         mask_controller_->forward();
