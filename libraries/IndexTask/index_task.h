@@ -14,26 +14,25 @@
 // The method used to determine an index is to advance the mask forward,
 // recording angular positions at which the Hall effect switch triggers from
 // low to high and from high to low; then doing the same in reverse; then taking
-// the eaverage of all four positions. Finally, the mask homes to its new zero
-// point to show the operator where the device believes this point to be.
+// the average of all four positions. Finally, the mask homes to its new zero
+// point to show the operator where the device believes this location to be.
 class IndexTask {
  public:
-
   // List of possible states the IndexTask can be in.
   enum class State : int {
-    START = 0,
-    INIT,
-    WAITING_FOR_FORWARD_LOW,
-    FORWARD_LOW,
-    FORWARD_HIGH,
-    REVERSE_LOW,
-    REVERSE_HIGH,
-    INDEXED,
-    CANNOT_INDEX
+    START = 0,                // Starting state.
+    INIT,                     // State following a request to initialize.
+    WAITING_FOR_FORWARD_LOW,  // Forward, waiting to be in a low state.
+    FORWARD_LOW,              // Forward, waiting for low-to-high transition.
+    FORWARD_HIGH,             // Forward, waiting for high-to-low transition.
+    REVERSE_LOW,              // Backward, waiting for low-to-high transition.
+    REVERSE_HIGH,             // Backward, waiting for high-to-low transition.
+    INDEXED,                  // Index acquired; waiting for next action.
+    CANNOT_INDEX              // Index couldn't be determined.
   };
 
-  // Amonut of time we are willing to wait for a HallSwitch state transition
-  // befire declaring that the device is  unable to find an index [ms].
+  // Amount of time we are willing to wait for a HallSwitch state transition
+  // before declaring that the device is  unable to find an index [ms].
   static const int INDEX_TIMEOUT_MS = 10000u;
 
   // Construct a new IndexTask, designating  the MaskController and
@@ -67,10 +66,10 @@ class IndexTask {
 
   // Utility method to check when an index timeout has occurred.
   //
-  // Returns: Irue if a timeout is active.
+  // Returns: True if a timeout is active.
   bool timedOut() const;
 
-  // The MaskController to manipulate..
+  // The MaskController to manipulate.
   MaskController* const mask_controller_;
 
   // The HallSwitch to read.
