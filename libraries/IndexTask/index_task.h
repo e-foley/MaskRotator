@@ -85,7 +85,7 @@ class IndexTask {
 
   // Time of last HallSwitch state change or request to index. Used as a
   // reference for index timeouts.
-  uint32_t last_index_progress_stamp_ms_;
+  unsigned long last_index_progress_stamp_ms_;
 
   // Container for angle datapoints used in the determination of the True
   // index position.
