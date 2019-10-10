@@ -53,7 +53,7 @@ void IndexTask::step() {
     case State::FORWARD_LOW:
       // Continue forward as we wait for a triggered sensor.
       if (hall_switch_->isTriggered()) {
-        key_positions_deg_[0] = mask_controller_->getPosition(false);
+        key_positions_deg_[0] = mask_controller_->getPositionDeg(false);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::FORWARD_HIGH;
       } else if (timedOut()) {
@@ -66,7 +66,7 @@ void IndexTask::step() {
       // We currently have a triggered sensor... Continue until it's not
       // triggered anymore.
       if (!hall_switch_->isTriggered()) {
-        key_positions_deg_[1] = mask_controller_->getPosition(false);
+        key_positions_deg_[1] = mask_controller_->getPositionDeg(false);
         mask_controller_->reverse();
         last_index_progress_stamp_ms_ = millis();
         state_ = State::REVERSE_LOW;
@@ -79,7 +79,7 @@ void IndexTask::step() {
     case State::REVERSE_LOW:
       // Retread our ground in reverse until sensor is high again...
       if (hall_switch_->isTriggered()) {
-        key_positions_deg_[2] = mask_controller_->getPosition(false);
+        key_positions_deg_[2] = mask_controller_->getPositionDeg(false);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::REVERSE_HIGH;
       } else if (timedOut()) {
@@ -91,7 +91,7 @@ void IndexTask::step() {
     case State::REVERSE_HIGH:
       // Last step in reverse...
       if (!hall_switch_->isTriggered()) {
-        key_positions_deg_[3] = mask_controller_->getPosition(false);
+        key_positions_deg_[3] = mask_controller_->getPositionDeg(false);
         mask_controller_->stop();
         float angle_sum_deg_ = 0.0f;
         for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {

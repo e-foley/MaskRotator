@@ -17,7 +17,8 @@ const int BRKB_PIN = 8;
 const int DIRB_PIN = 13;
 const int PWMB_PIN = 11;
 uint32_t STEP_PERIOD_US = 8000u;  // [us]
-const MaskController::Direction PREFERRED_DIRECTION = MaskController::Direction::AUTO;
+const MaskController::Direction PREFERRED_DIRECTION =
+    MaskController::Direction::AUTO;
 const int HALL_SWITCH_POWER_PIN = 4;
 const int HALL_SWITCH_STATE_PIN = 5;
 
@@ -76,18 +77,18 @@ void loop() {
         // Retrieve mask position.
         Serial.read();
         Serial.print("Current mask position: ");
-        Serial.print(mask_controller.getPosition(true));
+        Serial.print(mask_controller.getPositionDeg(true));
         Serial.print(" deg (");
-        Serial.print(mask_controller.getPosition(false));
+        Serial.print(mask_controller.getPositionDeg(false));
         Serial.println(" deg)");
         break;
       case 't':
         // Retrieve mask target position.
         Serial.read();
         Serial.print("Mask target position: ");
-        Serial.print(mask_controller.getTarget(true));
+        Serial.print(mask_controller.getTargetDeg(true));
         Serial.print(" deg (");
-        Serial.print(mask_controller.getTarget(false));
+        Serial.print(mask_controller.getTargetDeg(false));
         Serial.println(" deg)");
         break;
       case 'z':
@@ -113,7 +114,8 @@ void loop() {
       default: {
         float actual = 0.0f;
         if (mode == Mode::ABSOLUTE) {
-          actual = mask_controller.rotateTo(Serial.parseFloat(), PREFERRED_DIRECTION);
+          actual = mask_controller.rotateTo(Serial.parseFloat(),
+              PREFERRED_DIRECTION);
           Serial.print("Target set to ");
           Serial.print(actual);
           Serial.println(" degrees.");

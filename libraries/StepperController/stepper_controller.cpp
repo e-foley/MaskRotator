@@ -32,7 +32,7 @@ float StepperController::rotateBy(const float relative_angle) volatile {
   return target_angle_;
 }
 
-float StepperController::getPosition() const volatile {
+float StepperController::getPositionDeg() const volatile {
   // TODO: Disable interrupts here.
   return stepsToDegrees(position_);
 }
