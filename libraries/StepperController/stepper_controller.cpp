@@ -1,4 +1,7 @@
 #include "stepper_controller.h"
+#include "bipolar_stepper.h"
+#include <Arduino.h>
+#include <Math.h>
 
 StepperController::StepperController(BipolarStepper* const stepper,
     const int steps_per_rotation) : stepper_(stepper),

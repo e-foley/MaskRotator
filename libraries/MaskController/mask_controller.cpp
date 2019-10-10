@@ -1,4 +1,6 @@
 #include "mask_controller.h"
+#include "stepper_controller.h"
+#include <Math.h>
 
 MaskController::MaskController(
     volatile StepperController* const stepper_controller,

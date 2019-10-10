@@ -3,6 +3,7 @@
 
 #include "hall_switch.h"
 #include "mask_controller.h"
+#include <Arduino.h>  // For size_t
 
 // Operates a cooperative task whose responsibility is to drive a MaskController
 // and HallSwitch in conjunction to determine a new index position for the mask.

@@ -2,7 +2,7 @@
 #define STEPPER_CONTROLLER_H_
 
 #include "bipolar_stepper.h"
-#include "timer_one.h"
+#include <Arduino.h>  // For int16_t, int32_t
 
 // Drives a motor represented by BipolarStepper object.
 class StepperController {

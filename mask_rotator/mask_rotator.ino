@@ -1,4 +1,4 @@
-#include "Arduino.h"
+#include <Arduino.h>
 #include "bipolar_stepper.h"
 #include "hall_switch.h"
 #include "mask_controller.h"
