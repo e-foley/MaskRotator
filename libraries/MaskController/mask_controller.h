@@ -6,7 +6,7 @@
 // Operates a StepperController to manipulate a mask interfacing with a stepper
 // motor. Maintains knowledge of the gear ratio between motor and mask in order
 // to drive the motor to the desired angles.
-class MaskControler {
+class MaskController {
   public:
     // Preferences for direction of motion.
     enum class Direction : int {
