@@ -77,8 +77,8 @@ float MaskController::rotateBy(const float angle_deg, const bool wrap_result) {
 }
 
 float MaskController::getPositionDeg(const bool wrap_result) const {
-  const float nominal = motorToMaskAngle(stepper_controller_->getPositionDeg());
-  return wrap_result ? wrapAngleDeg(nominal) : nominal;
+  const float nominal_deg = motorToMaskAngle(stepper_controller_->getPositionDeg());
+  return wrap_result ? wrapAngleDeg(nominal_deg) : nominal_deg;
 }
 
 float MaskController::getTargetDeg(const bool wrap_result) const {
