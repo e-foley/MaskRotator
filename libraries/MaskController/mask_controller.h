@@ -35,23 +35,23 @@ class MaskController {
 
     // Rotates the mask to an absolute angle.
     //
-    // angle_deg: Absolute angle to rotate the mask to [deg].
+    // target_deg: Absolute angle to rotate the mask to [deg].
     // direction: Preferred direction of motion.
     // wrap_result: Whether the angle returned from the function is wrapped to
     //              the range [0, 360) degrees.
-    // Returns: The actual angle rotated to [deg]. May not match the specified
-    //          angle exactly due to limitations of the stepper motor.
+    // Returns: The actual absolute angle rotated to [deg]. May not match the
+    //          specified angle exactly due to motor resolution limits.
     float rotateTo(float target_deg, Direction direction = Direction::AUTO,
         bool wrap_result = true);
 
     // Rotates the mask by a relative angle.
     //
-    // angle_deg: Relative angle to rotate by [deg].
+    // angle_deg: Relative angle to rotate the mask by [deg].
     // direction: Preferred direction of motion.
     // wrap_result: Whether the angle returned from the function is wrapped to
     //              the range [0, 360) degrees.
-    // Returns: The actual angle rotated to [deg]. May not match the specified
-    //          angle exactly due to limitations of the stepper motor.
+    // Returns: The actual absolute angle rotated to [deg]. May not match the
+    //          specified angle exactly due to motor resolution limits.
     float rotateBy(float angle_deg, bool wrap_result = true);
 
     // Retrieves the current absolute position of the mask.
@@ -92,8 +92,13 @@ class MaskController {
     // Returns an absolute angle on [0, 360).
     static float wrapAngleDeg(float nominal_deg);
 
+    // The StepperController this MaskController manipulates.
     volatile StepperController* const stepper_controller_;
+
+    // Rotations of motor per one rotation of mask.
     const float gear_ratio_;
+
+    // Current absolute target angle [deg].
     float target_deg_;
 };
 
