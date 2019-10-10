@@ -1,8 +1,9 @@
 #include "stepper_controller.h"
 
-StepperController::StepperController(BipolarStepper* const stepper, const int steps_per_rotation)
-    : stepper_(stepper), steps_per_rotation_(steps_per_rotation), position_(0), target_angle_(0.0f),
-      target_steps_(0), behavior_(Behavior::STOPPED) {}
+StepperController::StepperController(BipolarStepper* const stepper,
+    const int steps_per_rotation) : stepper_(stepper),
+    steps_per_rotation_(steps_per_rotation), position_steps_(0),
+    target_deg_(0.0f), target_steps_(0), behavior_(Behavior::STOPPED) {}
 
 void StepperController::forward() volatile {
   behavior_ = Behavior::FORWARD;
@@ -16,41 +17,43 @@ void StepperController::stop() volatile {
   behavior_ = Behavior::STOPPED;
 }
 
-float StepperController::rotateTo(const float angle) volatile {
-  behavior_ = Behavior::STOPPED;  // Very brief pause to avoid potential momentary direction change.
-  target_angle_ = angle;
-  target_steps_ = degreesToSteps(target_angle_);
+float StepperController::rotateTo(const float target_deg) volatile {
+  // Very brief pause to avoid potential momentary direction change.
+  behavior_ = Behavior::STOPPED;
+  target_deg_ = target_deg;
+  target_steps_ = degreesToSteps(target_deg_);
   behavior_ = Behavior::TARGETING;
   return stepsToDegrees(target_steps_);
 }
 
-float StepperController::rotateBy(const float relative_angle) volatile {
-  behavior_ = Behavior::STOPPED;  // Very brief pause to avoid position_ changes.
-  target_angle_ = stepsToDegrees(position_) + relative_angle;
-  target_steps_ = degreesToSteps(target_angle_);
+float StepperController::rotateBy(const float angle_deg) volatile {
+  // Very brief pause to avoid position changes.
+  behavior_ = Behavior::STOPPED;
+  target_deg_ = stepsToDegrees(position_steps_) + angle_deg;
+  target_steps_ = degreesToSteps(target_deg_);
   behavior_ = Behavior::TARGETING;
-  return target_angle_;
+  return target_deg_;
 }
 
 float StepperController::getPositionDeg() const volatile {
   // TODO: Disable interrupts here.
-  return stepsToDegrees(position_);
+  return stepsToDegrees(position_steps_);
 }
 
 float StepperController::getTarget() const volatile {
-  return target_angle_;
+  return target_deg_;
 }
 
 void StepperController::setZero() volatile {
-  position_ = 0;
+  position_steps_ = 0;
 }
 
 void StepperController::offsetZero(const float relative_angle_deg) volatile {
-  position_ -= degreesToSteps(relative_angle_deg);
+  position_steps_ -= degreesToSteps(relative_angle_deg);
 }
 
-// Note: Instead of a switch tree, we could just set a function pointer (to a private helper
-// function) whenever we alter behavior_.  A function-pointer approach might be overkill though...
+// Note: Instead of a switch tree, we could set a function pointer (to a private
+// helper function) whenever we alter behavior_. Snazzy but probably overkill.
 void StepperController::update() volatile {
   if (stepper_ == nullptr) {
     return;
@@ -63,20 +66,20 @@ void StepperController::update() volatile {
       break;
     case Behavior::FORWARD:
       stepper_->stepForward();
-      position_++;
+      position_steps_++;
       break;
     case Behavior::REVERSE:
       stepper_->stepBackward();
-      position_--;
+      position_steps_--;
       break;
     case Behavior::TARGETING:
-      if (position_ < target_steps_) {
+      if (position_steps_ < target_steps_) {
         stepper_->stepForward();
-        position_++;
-      } else if (position_ > target_steps_) {
+        position_steps_++;
+      } else if (position_steps_ > target_steps_) {
         stepper_->stepBackward();
-        position_--;
-      } else /*position_ == target_steps_*/ {
+        position_steps_--;
+      } else /*position_steps_ == target_steps_*/ {
         behavior_ = Behavior::REACHED_TARGET;
       }
       break;
