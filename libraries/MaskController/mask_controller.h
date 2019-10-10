@@ -89,7 +89,10 @@ class MaskController {
     float motorToMaskAngleDeg(float motor_angle_deg) const;
 
   private:
-    // Returns an absolute angle on [0, 360).
+    // Wraps an unbounded angle to the range [0, 360) degrees.
+    //
+    // nominal_deg: The unbounded angle [deg].
+    // Returns: An equivalent angle on the range [0, 360) degrees.
     static float wrapAngleDeg(float nominal_deg);
 
     // The StepperController this MaskController manipulates.
