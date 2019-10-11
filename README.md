@@ -32,6 +32,14 @@ GND | GND
 ## Running
 1. Clone this repository.
 2. Set the Arduino sketchbook location to the new MaskRotator directory.
-3. Open mask_rotator.ino.
-4. Connect to the Arduino with a USB cable.
-5. Press Ctrl+U to upload the sketch.
+3. Open mask_rotator.ino using the Arduino IDE.
+4. Connect the power supply to the Arduino Uno.
+5. Connect the computer to the Arduino Uno with a USB cable.
+6. Press Ctrl+U to upload the sketch.
+
+## Communicating with the device
+Either
+* Open the serial monitor with Ctrl+Shift+M and type commands manually (e.g. `t18000` to spin the mask 180 degrees), or
+* Execute a custom program that implements the rotator's communication protocol.
+
+See *A Rotating Aperture Mask for Small Telescopes* for complete information about the communications protocol, or inspect the source of mask_rotator.ino.
