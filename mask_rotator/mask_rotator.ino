@@ -118,6 +118,10 @@ void loop() {
         Serial.read();
         index_task.index();
         break;
+      case 'g':
+        Serial.read();
+        Serial.println('g');
+        break;
       default: {
         float actual = 0.0f;
         if (mode == Mode::ABSOLUTE) {
