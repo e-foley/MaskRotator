@@ -9,6 +9,20 @@
 // Serial config
 const int SERIAL_BAUD_RATE = 19200;
 const int SERIAL_TIMEOUT_MS = 10;  // [ms]
+enum Command : char {
+  FORWARD_COMMAND = 'f',
+  BACKWARD_COMMAND = 'b',
+  STOP_COMMAND = 's',
+  GET_POSITION_COMMAND = 'p',
+  GET_TARGET_COMMAND = 't',
+  SET_ZERO_COMMAND = 'z',
+  ENTER_RELATIVE_MODE_COMMAND = 'r',
+  ENTER_ABSOLUTE_MODE_COMMAND = 'a',
+  LOCATE_INDEX_COMMAND = 'i',
+  PING_COMMAND = '?',
+  PING_RESPONSE = '!',
+  GO_TO_COMMAND = 'g'
+};
 
 // Motor/mask config
 const int BRKA_PIN = 9;
@@ -62,89 +76,95 @@ void loop() {
   if (Serial.available()) {
     const char command = Serial.peek();
     switch (command) {
-      case 'f':
-        // Go forward.
+      case FORWARD_COMMAND:
         Serial.read();
-        Serial.println("Moving mask forward.");
         mask_controller.forward();
+        Serial.write(FORWARD_COMMAND);
+        Serial.println();
         break;
-      case 'b':
-        // Go backward.
+      case BACKWARD_COMMAND:
         Serial.read();
-        Serial.println("Moving mask backward.");
         mask_controller.reverse();
+        Serial.write(BACKWARD_COMMAND);
+        Serial.println();
         break;
-      case 's':
-        // Stop.
+      case STOP_COMMAND:
         Serial.read();
-        Serial.println("Mask stopped.");
         mask_controller.stop();
+        Serial.write(STOP_COMMAND);
+        Serial.println();
         break;
-      case 'p':
-        // Retrieve mask position.
+      case GET_POSITION_COMMAND:
         Serial.read();
-        Serial.print("Current mask position: ");
-        Serial.print(mask_controller.getPositionDeg(true));
-        Serial.print(" deg (");
-        Serial.print(mask_controller.getPositionDeg(false));
-        Serial.println(" deg)");
+        Serial.write(GET_POSITION_COMMAND);
+        Serial.println(degreesToSerial(mask_controller.getPositionDeg(true)));
         break;
-      case 't':
-        // Retrieve mask target position.
+      case GET_TARGET_COMMAND:
         Serial.read();
-        Serial.print("Mask target position: ");
-        Serial.print(mask_controller.getTargetDeg(true));
-        Serial.print(" deg (");
-        Serial.print(mask_controller.getTargetDeg(false));
-        Serial.println(" deg)");
+        Serial.write(GET_TARGET_COMMAND);
+        Serial.println(degreesToSerial(mask_controller.getTargetDeg(true)));
         break;
-      case 'z':
-        // Zero current mask position.
+      case SET_ZERO_COMMAND:
         Serial.read();
         mask_controller.setZero();
-        Serial.println("Mask position zeroed.");
+        Serial.write(SET_ZERO_COMMAND);
+        Serial.println();
         break;
-      case 'r':
+      case ENTER_RELATIVE_MODE_COMMAND:
         Serial.read();
         mode = Mode::RELATIVE;
-        Serial.println("Mode set to relative.");
+        Serial.write(ENTER_RELATIVE_MODE_COMMAND);
+        Serial.println();
         break;
-      case 'a':
+      case ENTER_ABSOLUTE_MODE_COMMAND:
         Serial.read();
         mode = Mode::ABSOLUTE;
-        Serial.println("Mode set to absolute.");
+        Serial.write(ENTER_ABSOLUTE_MODE_COMMAND);
+        Serial.println();
         break;
-      case 'i':
+      case LOCATE_INDEX_COMMAND:
         Serial.read();
         index_task.index();
+        Serial.write(LOCATE_INDEX_COMMAND);
+        Serial.println();
         break;
-      case 'g':
+      case PING_COMMAND:
         Serial.read();
-        Serial.println('g');
+        Serial.write(PING_RESPONSE);
+        Serial.println();
         break;
-      default: {
-        float actual = 0.0f;
+      case GO_TO_COMMAND: {
+        Serial.read();  // Get the command character out of the buffer.
+        float serial_deg = serialToDegrees(Serial.parseInt());
+        float actual_deg = 0.0f;
         if (mode == Mode::ABSOLUTE) {
-          actual = mask_controller.rotateTo(Serial.parseFloat(),
-              PREFERRED_DIRECTION);
-          Serial.print("Target set to ");
-          Serial.print(actual);
-          Serial.println(" degrees.");
+          actual_deg = mask_controller.rotateTo(serial_deg, PREFERRED_DIRECTION);
         } else if (mode == Mode::RELATIVE) {
-          const float relative_angle = Serial.parseFloat();
-          actual = mask_controller.rotateBy(relative_angle);
-          Serial.print("Rotating mask by ");
-          Serial.print(relative_angle);
-          Serial.print(" degrees to new target of ");
-          Serial.print(actual);
-          Serial.println(" degrees.");
+          actual_deg = mask_controller.rotateBy(serial_deg);
         }
+        Serial.write(GO_TO_COMMAND);
+        Serial.println(degreesToSerial(actual_deg));
         break;
       }
+      default:
+        Serial.read();  // Discard character if we don't recognize it.
+        break;
     }
   }
 }
 
+// Converts an angle from serial convention to degrees.
+float serialToDegrees(const int32_t serial) {
+  return serial / 100.0f;
+}
+
+// Convets an angle from degrees to serial convention. There is no overflow
+// protection.
+int32_t degreesToSerial(const float degrees) {
+  return static_cast<int32_t>(round(degrees * 100.0f));
+}
+
+// Function run via timer interrupt to actuate motor.
 void update() {
   motor_controller.update();
 }
