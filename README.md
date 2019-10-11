@@ -1,5 +1,5 @@
 # MaskRotator
-Arduino code driving a rotation mechanism for telescope aperture masks.
+Arduino code driving a rotation mechanism for telescope aperture masks. All code in this repository except for the TimerOne library was written by Ed Foley.
 
 ## Hardware required
 * [Arduino Uno](https://store.arduino.cc/usa/arduino-uno-rev3)
