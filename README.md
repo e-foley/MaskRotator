@@ -39,7 +39,7 @@ GND | GND
 
 ## Communicating with the device
 Either
-* Open the serial monitor with Ctrl+Shift+M and type commands manually (e.g. `t18000` to spin the mask 180 degrees), or
+* Open the serial monitor with Ctrl+Shift+M and type commands manually (e.g. `rt18000` to spin the mask 180 degrees), or
 * Execute a custom program that implements the rotator's communication protocol.
 
 See *A Rotating Aperture Mask for Small Telescopes* for complete information about the communications protocol, or inspect the source of mask_rotator.ino.
