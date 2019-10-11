@@ -19,9 +19,12 @@ enum Command : char {
   ENTER_RELATIVE_MODE_COMMAND = 'r',
   ENTER_ABSOLUTE_MODE_COMMAND = 'a',
   LOCATE_INDEX_COMMAND = 'i',
+  FOUND_INDEX_RESPONSE = 'I',
+  COULD_NOT_FIND_INDEX_RESPONSE = '~',
   PING_COMMAND = '?',
   PING_RESPONSE = '!',
-  GO_TO_COMMAND = 'g'
+  GO_TO_COMMAND = 'g',
+  UNRECOGNIZED_COMMAND = 'x'
 };
 
 // Motor/mask config
@@ -53,8 +56,7 @@ enum class Mode {
   ABSOLUTE,
   RELATIVE
 } mode = Mode::ABSOLUTE;
-float target = 0.0f;
-bool dir = true;
+bool indexing_active = false;
 
 // Called once at the start of the progrom; initializes all hardware and tasks.
 void setup() {
@@ -73,6 +75,21 @@ void setup() {
 void loop() {
   index_task.step();
 
+  // Let client know if we have found or failed to find our index.
+  if (indexing_active) {
+    const IndexTask::State index_state = index_task.getState();
+    if (index_state == IndexTask::State::INDEXED) {
+      Serial.write(FOUND_INDEX_RESPONSE);
+      Serial.println();
+      indexing_active = false;
+    } else if (index_state == IndexTask::State::CANNOT_INDEX) {
+      Serial.write(COULD_NOT_FIND_INDEX_RESPONSE);
+      Serial.println();
+      indexing_active = false;
+    }
+  }
+
+  // Process input.
   if (Serial.available()) {
     const char command = Serial.peek();
     switch (command) {
@@ -124,6 +141,7 @@ void loop() {
         break;
       case LOCATE_INDEX_COMMAND:
         Serial.read();
+        indexing_active = true;
         index_task.index();
         Serial.write(LOCATE_INDEX_COMMAND);
         Serial.println();
@@ -148,6 +166,8 @@ void loop() {
       }
       default:
         Serial.read();  // Discard character if we don't recognize it.
+        Serial.write(UNRECOGNIZED_COMMAND);
+        Serial.println();
         break;
     }
   }
