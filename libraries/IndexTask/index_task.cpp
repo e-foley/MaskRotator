@@ -6,7 +6,8 @@
 IndexTask::IndexTask(MaskController* const mask_controller,
     HallSwitch* const hall_switch) : mask_controller_(mask_controller),
     hall_switch_(hall_switch), init_requested_(false), index_requested_(false),
-    state_(State::START), last_index_progress_stamp_ms_(0u) {
+    state_(State::START), last_index_progress_stamp_ms_(0u),
+    index_found_callback_(nullptr) {
   for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {
     key_positions_deg_[i] = 0.0f;
   }
@@ -93,13 +94,23 @@ void IndexTask::step() {
       if (!hall_switch_->isTriggered()) {
         key_positions_deg_[3] = mask_controller_->getPositionDeg(false);
         mask_controller_->stop();
-        float angle_sum_deg_ = 0.0f;
-        for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {
-          angle_sum_deg_ += key_positions_deg_[i];
-        }
-        mask_controller_->offsetZero(angle_sum_deg_ / NUM_KEY_POSITIONS);
-        mask_controller_->rotateTo(0.0f);
         hall_switch_->setPowerState(false);
+
+        // Calculate average transition position.
+        float angle_sum_deg = 0.0f;
+        for (size_t i = 0u; i < NUM_KEY_POSITIONS; ++i) {
+          angle_sum_deg += key_positions_deg_[i];
+        }
+        const float offset_deg = angle_sum_deg / NUM_KEY_POSITIONS;
+
+        // Apply new index position and communicate it via callback.
+        mask_controller_->offsetZero(offset_deg);
+        if (index_found_callback_ != nullptr) {
+          index_found_callback_(offset_deg);
+        }
+
+        // Rotate to new zero to show users where we think it is.
+        mask_controller_->rotateTo(0.0f);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::INDEXED;
       } else if (timedOut()) {

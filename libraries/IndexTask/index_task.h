@@ -58,7 +58,17 @@ class IndexTask {
   void index();
 
   // Retrieves the current state of the IndexTask. See the State enumeration.
+  //
+  // Returns: The current State enumerator describing the state of the task.
   State getState() const;
+
+  // Establishes a function to call when an index has been located.
+  //
+  // cb: The function to invoke when an index has been located. The function's
+  //     parameter will contain the mask angle at which the new index has been
+  //     established relative to the old index [deg]. Set to nullptr to remove
+  //     the callback.
+  void setIndexFoundCallback(void (*cb)(float relative_angle_deg));
 
  private:
   // Length of array in which we store positions to use in calculating an
@@ -90,6 +100,9 @@ class IndexTask {
   // Container for angle datapoints used in the determination of the True
   // index position.
   float key_positions_deg_[NUM_KEY_POSITIONS];
+
+  // Callback to invoke when an index has been located.
+  void (*index_found_callback_)(float relative_angle_deg);
 };
 
 #endif
