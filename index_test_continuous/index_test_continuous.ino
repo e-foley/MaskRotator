@@ -53,7 +53,7 @@ unsigned long index_time_ms = 0u;
 
 bool hall_state = false;
 unsigned long start_stamp_ms = 0u;
-const int RUN_FOR_MS = 10000u;
+int run_for_ms = 0;
 
 // Called once at the start of the progrom; initializes all hardware and tasks.
 void setup() {
@@ -75,11 +75,13 @@ void loop() {
         const char command = Serial.read();
         if (command == 'f') {
           hall_switch.setPowerState(true);
+          run_for_ms = Serial.parseInt();
           mask_controller.forward();
           start_stamp_ms = millis();
           state = RUNNING;
         } else if (command == 'b') {
           hall_switch.setPowerState(true);
+          run_for_ms = Serial.parseInt();
           mask_controller.reverse();
           start_stamp_ms = millis();
           state = RUNNING;
@@ -98,7 +100,7 @@ void loop() {
         printStuff(delta_ms, hall_state, pos_deg);
       }
 
-      if (delta_ms > RUN_FOR_MS) {
+      if (delta_ms > run_for_ms) {
         mask_controller.stop();
         hall_switch.setPowerState(false);
         state = DONE;
