@@ -32,6 +32,13 @@ class IndexTask {
     CANNOT_INDEX              // Index can't be found; waiting for next action.
   };
 
+  // Results of indexing operations.
+  enum class IndexEvent {
+    NONE,            // Default value.
+    INDEX_FOUND,     // Index has been located.
+    INDEX_NOT_FOUND  // We failed to find the index.
+  };
+
   // Amount of time we are willing to wait for a HallSwitch state transition
   // before declaring that the device is  unable to find an index [ms].
   static const int INDEX_TIMEOUT_MS = 10000u;
@@ -62,13 +69,14 @@ class IndexTask {
   // Returns: The current State enumerator describing the state of the task.
   State getState() const;
 
-  // Establishes a function to call when an index has been located.
+  // Establishes a function to call when we have finished looking for an index.
   //
-  // cb: The function to invoke when an index has been located. The function's
-  //     parameter will contain the mask angle at which the new index has been
-  //     established relative to the old index [deg]. Set to nullptr to remove
-  //     the callback.
-  void setIndexFoundCallback(void (*cb)(float relative_angle_deg));
+  // cb: The function to invoke when we have finished looking for an index.
+  //  -> event: The outcome of the indexing operation.
+  //  -> index_offset_deg: The angle the index position has been adjusted by as
+  //                       a result of the indexing operation [deg]. Set to
+  //                       nullptr to remove the callback.
+  void setIndexEventCallback(void (*cb)(IndexEvent event, float index_offset_deg));
 
  private:
   // Length of array in which we store positions to use in calculating an
@@ -79,6 +87,9 @@ class IndexTask {
   //
   // Returns: True if a timeout is active.
   bool timedOut() const;
+
+  // Utility method announcing via callback that an index could not be located.
+  void announceIndexNotFound() const;
 
   // The MaskController to manipulate.
   MaskController* const mask_controller_;
@@ -101,8 +112,8 @@ class IndexTask {
   // index position.
   float key_positions_deg_[NUM_KEY_POSITIONS];
 
-  // Callback to invoke when an index has been located.
-  void (*index_found_callback_)(float relative_angle_deg);
+  // Callback to invoke when we have finished looking for an index.
+  void (*index_event_callback_)(IndexEvent event, float index_offset_deg);
 };
 
 #endif
