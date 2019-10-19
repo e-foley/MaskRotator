@@ -56,7 +56,6 @@ enum class Mode {
   ABSOLUTE,
   RELATIVE
 } mode = Mode::ABSOLUTE;
-bool indexing_active = false;
 
 // Called once at the start of the progrom; initializes all hardware and tasks.
 void setup() {
@@ -66,6 +65,7 @@ void setup() {
   stepper.enable();
   hall_switch.init();
   index_task.init();
+  index_task.setIndexEventCallback(&actOnIndexEvent);
   timer.initialize();
   timer.attachInterrupt(update, STEP_PERIOD_US);
 }
@@ -74,20 +74,6 @@ void setup() {
 // command inputs.
 void loop() {
   index_task.step();
-
-  // Let client know if we have found or failed to find our index.
-  if (indexing_active) {
-    const IndexTask::State index_state = index_task.getState();
-    if (index_state == IndexTask::State::INDEXED) {
-      Serial.write(FOUND_INDEX_RESPONSE);
-      Serial.println();
-      indexing_active = false;
-    } else if (index_state == IndexTask::State::CANNOT_INDEX) {
-      Serial.write(COULD_NOT_FIND_INDEX_RESPONSE);
-      Serial.println();
-      indexing_active = false;
-    }
-  }
 
   // Process input.
   if (Serial.available()) {
@@ -141,7 +127,6 @@ void loop() {
         break;
       case LOCATE_INDEX_COMMAND:
         Serial.read();
-        indexing_active = true;
         index_task.index();
         Serial.write(LOCATE_INDEX_COMMAND);
         Serial.println();
@@ -182,6 +167,18 @@ float serialToDegrees(const int32_t serial) {
 // protection.
 int32_t degreesToSerial(const float degrees) {
   return static_cast<int32_t>(round(degrees * 100.0f));
+}
+
+void actOnIndexEvent(const IndexTask::IndexEvent event,
+    const float index_offset_deg) {
+  (void)(index_offset_deg);  // Denote index offset parameter as unused.
+  if (event == IndexTask::IndexEvent::INDEX_FOUND) {
+    Serial.write(FOUND_INDEX_RESPONSE);
+    Serial.println();
+  } else if (event == IndexTask::IndexEvent::INDEX_NOT_FOUND) {
+    Serial.write(COULD_NOT_FIND_INDEX_RESPONSE);
+    Serial.println();
+  }
 }
 
 // Function run via timer interrupt to actuate motor.
