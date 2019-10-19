@@ -103,6 +103,11 @@ void loop() {
       if (delta_ms > run_for_ms) {
         mask_controller.stop();
         hall_switch.setPowerState(false);
+        if (hall_state) {
+          Serial.println();
+        }
+        Serial.println();
+        hall_state = false;
         state = DONE;
       }
       break;
@@ -111,20 +116,24 @@ void loop() {
     default:
       mask_controller.stop();
       hall_switch.setPowerState(false);
+      hall_state = false;
       state = START;
       break;
   }
 }
 
 void printStuff(const int delta_ms, const bool hall_state, const float pos_deg) {
-  Serial.print(delta_ms);
-  Serial.print("\t");
   if (hall_state) {
     Serial.print("HIGH\t");
+    Serial.print(delta_ms);
+    Serial.print("\t");
+    Serial.print(pos_deg);
   } else {
-    Serial.print("LOW\t");
+    Serial.print("\tLOW\t");
+    Serial.print(delta_ms);
+    Serial.print("\t");
+    Serial.println(pos_deg);  // Newline only on high-to-low transition.
   }
-  Serial.println(pos_deg);
 }
 
 // Function run via timer interrupt to actuate motor.
