@@ -53,7 +53,7 @@ unsigned long index_time_ms = 0u;
 
 bool hall_state = false;
 unsigned long start_stamp_ms = 0u;
-int run_for_ms = 0;
+long run_for_ms = 0;
 
 // Called once at the start of the progrom; initializes all hardware and tasks.
 void setup() {
@@ -89,7 +89,7 @@ void loop() {
       }
       break;
     case RUNNING: {
-      const int delta_ms = millis() - start_stamp_ms;
+      const long delta_ms = millis() - start_stamp_ms;
       if (!hall_state && hall_switch.isTriggered()) {
         const float pos_deg = mask_controller.getPositionDeg(false);
         hall_state = true;
@@ -122,7 +122,7 @@ void loop() {
   }
 }
 
-void printStuff(const int delta_ms, const bool hall_state, const float pos_deg) {
+void printStuff(const long delta_ms, const bool hall_state, const float pos_deg) {
   if (hall_state) {
     Serial.print("HIGH\t");
     Serial.print(delta_ms);
