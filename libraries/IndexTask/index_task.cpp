@@ -164,6 +164,11 @@ IndexTask::State IndexTask::getState() const {
   return state_;
 }
 
+void IndexTask::setIndexEventCallback(
+    void (*const cb)(IndexEvent event, float index_offset_deg)) {
+  index_event_callback_ = cb;
+}
+
 bool IndexTask::timedOut() const {
   return (int)(millis() - last_index_progress_stamp_ms_) > INDEX_TIMEOUT_MS;
 }
