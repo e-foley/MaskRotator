@@ -38,6 +38,15 @@ bool ready_to_index = true;
 int trials_complete = 0;
 const int NUM_TRIALS = 3;
 bool finished = false;
+bool has_zeroed = false;
+unsigned long index_time_ms = 0u;
+
+enum State {
+  START,
+  INDEXING,
+  PAUSING,
+  DONE
+} state = START;
 
 // Called once at the start of the progrom; initializes all hardware and tasks.
 void setup() {
@@ -54,14 +63,38 @@ void setup() {
 
 void loop() {
   index_task.step();
-  if (ready_to_index) {
-    index_task.index();
-    ready_to_index = false;
+
+  switch (state) {
+    case START:
+      if (ready_to_index && Serial.isAvailable() && Serial.read() == 'g') {
+        index_task.index();
+        ready_to_index = false;
+        state = INDEXING;
+      }
+      break;
+    case INDEXING:
+      if (ready_to_index) {
+        index_time_ms = millis();
+        state = PAUSING;
+      }
+      break;
+    case PAUSING:
+      if (millis() - index_time_ms > 1000 && !finished) {
+        index_task.index();
+        ready_to_index = false;
+        state = INDEXING;
+      } else if (finished) {
+        state = DONE;
+      }
+    case DONE:
+      // Spin
+      break;
   }
 }
 
 void actOnIndexEvent(const IndexTask::IndexEvent event,
     const float index_offset_deg) {
+  const float pos_deg = mask_controller.getPositionDeg(false);
   Serial.print(trials_complete + 1);
   Serial.print("\t");
   if (event == IndexTask::IndexEvent::INDEX_FOUND) {
@@ -72,7 +105,7 @@ void actOnIndexEvent(const IndexTask::IndexEvent event,
   Serial.print("\t");
   Serial.print(index_offset_deg);
   Serial.print("\t");
-  Serial.print(mask_controller.getPositionDeg(false));
+  Serial.print(pos_deg);
   Serial.println();
   trials_complete++;
   if (trials_complete >= NUM_TRIALS) {
