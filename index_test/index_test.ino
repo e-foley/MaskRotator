@@ -97,7 +97,10 @@ void loop() {
 void actOnIndexEvent(const IndexTask::IndexEvent event,
     const float index_offset_deg) {
   const float pos_deg = mask_controller.getPositionDeg(false);
+  const unsigned long now_ms = millis();
   Serial.print(trials_complete + 1);
+  Serial.print("\t");
+  Serial.print(now_ms);
   Serial.print("\t");
   if (event == IndexTask::IndexEvent::INDEX_FOUND) {
     Serial.print("GOOD");
