@@ -36,7 +36,7 @@ IndexTask index_task(&mask_controller, &hall_switch);
 TimerOne timer;
 bool ready_to_index = true;
 int trials_complete = 0;
-const int NUM_TRIALS = 3;
+int num_trials = 0;
 bool finished = false;
 bool has_zeroed = false;
 unsigned long index_time_ms = 0u;
@@ -67,6 +67,7 @@ void loop() {
   switch (state) {
     case START:
       if (ready_to_index && Serial.available() && Serial.read() == 'g') {
+        num_trials = Serial.parseInt();
         index_task.index();
         ready_to_index = false;
         state = INDEXING;
@@ -113,7 +114,7 @@ void actOnIndexEvent(const IndexTask::IndexEvent event,
   Serial.print(pos_deg);
   Serial.println();
   trials_complete++;
-  if (trials_complete >= NUM_TRIALS) {
+  if (trials_complete >= num_trials) {
     finished = true;
   } else {
     ready_to_index = true;
