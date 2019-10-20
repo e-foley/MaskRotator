@@ -66,19 +66,21 @@ void loop() {
 
   switch (state) {
     case START:
-      if (ready_to_index && Serial.isAvailable() && Serial.read() == 'g') {
+      if (ready_to_index && Serial.available() && Serial.read() == 'g') {
         index_task.index();
         ready_to_index = false;
         state = INDEXING;
       }
       break;
     case INDEXING:
+      // ready_to_index flag is raised when the index task has found a position
       if (ready_to_index) {
         index_time_ms = millis();
         state = PAUSING;
       }
       break;
     case PAUSING:
+      // We wait a little bit for the mask to find its new home position.
       if (millis() - index_time_ms > 1000 && !finished) {
         index_task.index();
         ready_to_index = false;

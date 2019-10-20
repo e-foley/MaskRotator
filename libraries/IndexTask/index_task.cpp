@@ -108,13 +108,14 @@ void IndexTask::step() {
         const float offset_deg = angle_sum_deg / NUM_KEY_POSITIONS;
 
         // Apply new index position and communicate it via callback.
-        mask_controller_->offsetZero(offset_deg);
+        //mask_controller_->offsetZero(offset_deg);
         if (index_event_callback_ != nullptr) {
           index_event_callback_(IndexEvent::INDEX_FOUND, offset_deg);
         }
 
         // Rotate to new zero to show users where we think it is.
-        mask_controller_->rotateTo(0.0f);
+        //mask_controller_->rotateTo(0.0f);
+        mask_controller_->rotateTo(offset_deg);
         last_index_progress_stamp_ms_ = millis();
         state_ = State::INDEXED;
       } else if (timedOut()) {
