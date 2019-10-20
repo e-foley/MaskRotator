@@ -38,8 +38,8 @@ bool ready_to_index = true;
 int trials_complete = 0;
 int num_trials = 0;
 bool finished = false;
-bool has_zeroed = false;
 unsigned long index_time_ms = 0u;
+unsigned long start_time_ms = 0u;
 
 enum State {
   START,
@@ -68,6 +68,9 @@ void loop() {
     case START:
       if (ready_to_index && Serial.available() && Serial.read() == 'g') {
         num_trials = Serial.parseInt();
+        trials_complete = 0;
+        finished = false;
+        start_time_ms = millis();
         index_task.index();
         ready_to_index = false;
         state = INDEXING;
@@ -78,19 +81,24 @@ void loop() {
       if (ready_to_index) {
         index_time_ms = millis();
         state = PAUSING;
+      } else if (finished) {
+        state = DONE;
       }
       break;
     case PAUSING:
       // We wait a little bit for the mask to find its new home position.
-      if (millis() - index_time_ms > 1000 && !finished) {
+      if (millis() - index_time_ms > 500 && !finished) {
         index_task.index();
         ready_to_index = false;
         state = INDEXING;
       } else if (finished) {
         state = DONE;
       }
+      break;
     case DONE:
-      // Spin
+      Serial.println();
+      ready_to_index = true;
+      state = START;
       break;
   }
 }
@@ -101,7 +109,7 @@ void actOnIndexEvent(const IndexTask::IndexEvent event,
   const unsigned long now_ms = millis();
   Serial.print(trials_complete + 1);
   Serial.print("\t");
-  Serial.print(now_ms);
+  Serial.print(now_ms - start_time_ms);
   Serial.print("\t");
   if (event == IndexTask::IndexEvent::INDEX_FOUND) {
     Serial.print("GOOD");
